@@ -8,18 +8,24 @@
     <style>
         body {
             font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
         }
-        .page {
-            text-align: center;
-            margin-bottom: 20px;
+        #pdf-container {
+            width: 100%;
+            overflow-x: hidden;
         }
         canvas {
+            display: block;
+            margin: 10px auto;
             border: 1px solid #ccc;
         }
     </style>
 </head>
 <body>
-    <h1>PDF Viewer</h1>
     <div id="pdf-container"></div>
     <script>
         // URL до вашого PDF файлу
@@ -32,13 +38,17 @@
         pdfjsLib.getDocument(url).promise.then(function(pdfDoc) {
             var numPages = pdfDoc.numPages;
             var pdfContainer = document.getElementById('pdf-container');
-            
+
             // Функція для рендерингу сторінки
             function renderPage(pageNum) {
                 pdfDoc.getPage(pageNum).then(function(page) {
                     var canvas = document.createElement('canvas');
                     var context = canvas.getContext('2d');
-                    var viewport = page.getViewport({ scale: 1.5 });
+                    
+                    // Отримуємо ширину вікна браузера
+                    var scale = window.innerWidth / page.getViewport({ scale: 1 }).width; // Масштаб, щоб відповідати ширині екрану
+                    var viewport = page.getViewport({ scale: scale });
+
                     canvas.height = viewport.height;
                     canvas.width = viewport.width;
 
