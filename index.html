@@ -8,21 +8,30 @@
     <style>
         body {
             font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
         }
-        .page {
-            text-align: center;
-            margin-bottom: 20px;
+        #pdf-container {
+            width: 100%;
+            overflow-y: auto; /* Прокручування по вертикалі */
+            padding: 10px;
+            box-sizing: border-box;
         }
         canvas {
+            display: block;
+            margin: 10px auto; /* Центруємо канвас */
             border: 1px solid #ccc;
         }
     </style>
 </head>
 <body>
-    <h1>PDF Viewer</h1>
+
+    <h1 style="text-align: center;">PDF Viewer</h1>
     <div id="pdf-container"></div>
+
     <script>
-        // URL до вашого PDF файлу на GitHub
+        // URL до вашого PDF файлу
         var url = 'CV_QE_Serhii_Protsiv (1).pdf';  // Замініть на правильне ім'я вашого PDF файлу
 
         // Ініціалізація PDF.js
@@ -32,13 +41,16 @@
         pdfjsLib.getDocument(url).promise.then(function(pdfDoc) {
             var numPages = pdfDoc.numPages;
             var pdfContainer = document.getElementById('pdf-container');
-
+            
+            // Масштабування на всю ширину екрану
+            var scale = window.innerWidth / 600; // Масштабування під ширину екрана (600px - орієнтовна ширина сторінки PDF)
+            
             // Створюємо Canvas для кожної сторінки
             for (var pageNum = 1; pageNum <= numPages; pageNum++) {
                 pdfDoc.getPage(pageNum).then(function(page) {
                     var canvas = document.createElement('canvas');
                     var context = canvas.getContext('2d');
-                    var viewport = page.getViewport({ scale: 1.5 });
+                    var viewport = page.getViewport({ scale: scale });
                     canvas.height = viewport.height;
                     canvas.width = viewport.width;
 
@@ -56,5 +68,6 @@
             console.error('Error loading PDF:', error);
         });
     </script>
+
 </body>
 </html>
