@@ -5,35 +5,55 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PDF Viewer</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .page {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        canvas {
+            border: 1px solid #ccc;
+        }
+    </style>
 </head>
 <body>
-    <h1>Ваше меню</h1>
-    <canvas id="pdf-canvas"></canvas>
+    <h1>PDF Viewer</h1>
+    <div id="pdf-container"></div>
     <script>
-        var url = 'CV_QE_Serhii_Protsiv (1).pdf';  // Замість цього вставте ім'я вашого PDF файлу
+        // URL до вашого PDF файлу на GitHub
+        var url = 'CV_QE_Serhii_Protsiv (1).pdf';  // Замініть на правильне ім'я вашого PDF файлу
 
         // Ініціалізація PDF.js
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js';
 
         // Отримуємо PDF документ
-        pdfjsLib.getDocument(url).promise.then(function (pdfDoc_) {
-            var pdfDoc = pdfDoc_;
-            pdfDoc.getPage(1).then(function (page) {
-                var scale = 1.5;
-                var viewport = page.getViewport({ scale: scale });
-                var canvas = document.getElementById('pdf-canvas');
-                var context = canvas.getContext('2d');
-                canvas.height = viewport.height;
-                canvas.width = viewport.width;
+        pdfjsLib.getDocument(url).promise.then(function(pdfDoc) {
+            var numPages = pdfDoc.numPages;
+            var pdfContainer = document.getElementById('pdf-container');
 
-                var renderContext = {
-                    canvasContext: context,
-                    viewport: viewport
-                };
+            // Створюємо Canvas для кожної сторінки
+            for (var pageNum = 1; pageNum <= numPages; pageNum++) {
+                pdfDoc.getPage(pageNum).then(function(page) {
+                    var canvas = document.createElement('canvas');
+                    var context = canvas.getContext('2d');
+                    var viewport = page.getViewport({ scale: 1.5 });
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
 
-                // Рендеримо першу сторінку PDF
-                page.render(renderContext);
-            });
+                    // Рендеримо сторінку на канвас
+                    var renderContext = {
+                        canvasContext: context,
+                        viewport: viewport
+                    };
+                    page.render(renderContext).promise.then(function() {
+                        pdfContainer.appendChild(canvas); // Додаємо канвас на сторінку
+                    });
+                });
+            }
+        }).catch(function(error) {
+            console.error('Error loading PDF:', error);
         });
     </script>
 </body>
