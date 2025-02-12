@@ -22,7 +22,7 @@
     <h1>PDF Viewer</h1>
     <div id="pdf-container"></div>
     <script>
-        // URL до вашого PDF файлу на GitHub
+        // URL до вашого PDF файлу
         var url = 'Menu.pdf';  // Замініть на правильне ім'я вашого PDF файлу
 
         // Ініціалізація PDF.js
@@ -32,9 +32,9 @@
         pdfjsLib.getDocument(url).promise.then(function(pdfDoc) {
             var numPages = pdfDoc.numPages;
             var pdfContainer = document.getElementById('pdf-container');
-
-            // Створюємо Canvas для кожної сторінки
-            for (var pageNum = 1; pageNum <= numPages; pageNum++) {
+            
+            // Функція для рендерингу сторінки
+            function renderPage(pageNum) {
                 pdfDoc.getPage(pageNum).then(function(page) {
                     var canvas = document.createElement('canvas');
                     var context = canvas.getContext('2d');
@@ -49,9 +49,18 @@
                     };
                     page.render(renderContext).promise.then(function() {
                         pdfContainer.appendChild(canvas); // Додаємо канвас на сторінку
+                        
+                        // Якщо це не остання сторінка, рендеримо наступну
+                        if (pageNum < numPages) {
+                            renderPage(pageNum + 1);
+                        }
                     });
                 });
             }
+
+            // Починаємо з першої сторінки
+            renderPage(1);
+
         }).catch(function(error) {
             console.error('Error loading PDF:', error);
         });
