@@ -1,87 +1,77 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uk">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f4f4f4;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      flex-direction: column;
-      overflow: hidden;
-    }
-    #pdf-container {
-      width: 100%;
-      height: 100%;
-      overflow-y: auto; /* Прокручування по вертикалі */
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-      align-items: center;
-      padding: 10px;
-      box-sizing: border-box;
-    }
-    canvas {
-      display: block;
-      margin-bottom: 20px; /* Відступ між сторінками */
-      border: 1px solid #ccc;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        #pdf-viewer {
+            width: 80%;
+            display: flex;
+            justify-content: center;
+        }
+        .page {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 10px;
+            width: 100%;
+        }
+        canvas {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
 </head>
 <body>
+    <div id="pdf-viewer"></div>
 
-  <h1 style="text-align: center;">PDF Viewer</h1>
-  <div id="pdf-container"></div>
+    <script>
+        const url = 'Menu.pdf'; // Вкажіть шлях до вашого PDF файлу
 
-  <script>
-    var url = 'Menu.pdf';  // Замініть на правильне ім'я вашого PDF файлу
-    var pdfjsLib = window['pdfjs-dist'];
+        // Завантажуємо PDF
+        pdfjsLib.getDocument(url).promise.then(pdf => {
+            const viewer = document.getElementById('pdf-viewer');
+            let currentPage = 1;
 
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js';
+            function renderPage(pageNum) {
+                pdf.getPage(pageNum).then(page => {
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    const viewport = page.getViewport({ scale: 1.5 });
 
-    pdfjsLib.getDocument(url).promise.then(function (pdfDoc) {
-      var numPages = pdfDoc.numPages;
-      var pdfContainer = document.getElementById('pdf-container');
+                    canvas.width = viewport.width;
+                    canvas.height = viewport.height;
 
-      // Функція для рендерингу сторінки
-      function renderPage(pageNum) {
-        pdfDoc.getPage(pageNum).then(function (page) {
-          var canvas = document.createElement('canvas');
-          var context = canvas.getContext('2d');
+                    page.render({ canvasContext: context, viewport: viewport }).promise.then(() => {
+                        const pageDiv = document.createElement('div');
+                        pageDiv.classList.add('page');
+                        pageDiv.appendChild(canvas);
+                        viewer.appendChild(pageDiv);
+                    });
+                });
+            }
 
-          // Масштабування під ширину екрану
-          var scale = window.innerWidth / 600; // Масштабування під ширину екрана (600px - орієнтовна ширина сторінки PDF)
-          var viewport = page.getViewport({ scale: scale });
+            function showNextPage() {
+                if (currentPage <= pdf.numPages) {
+                    renderPage(currentPage);
+                    currentPage++;
+                }
+            }
 
-          canvas.height = viewport.height;
-          canvas.width = viewport.width;
-
-          var renderContext = {
-            canvasContext: context,
-            viewport: viewport
-          };
-
-          page.render(renderContext).promise.then(function () {
-            pdfContainer.appendChild(canvas); // Додаємо канвас на сторінку
-          });
+            // Початкова демонстрація всіх сторінок по черзі
+            setInterval(showNextPage, 1000); // Затримка в 1 секунду між сторінками
+        }).catch(error => {
+            console.error('Помилка завантаження PDF:', error);
         });
-      }
-
-      // Перебираємо всі сторінки та додаємо їх в контейнер
-      for (var pageNum = 1; pageNum <= numPages; pageNum++) {
-        renderPage(pageNum);
-      }
-    }).catch(function (error) {
-      console.error('Error loading PDF:', error);
-    });
-  </script>
-
+    </script>
 </body>
 </html>
