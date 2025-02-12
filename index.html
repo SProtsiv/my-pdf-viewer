@@ -7,30 +7,41 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
     <style>
         body {
-	@@ -32,7 +31,7 @@ <h1 style="text-align: center;">PDF Viewer</h1>
-
+            font-family: Arial, sans-serif;
+        }
+        .page {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        canvas {
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <h1>PDF Viewer</h1>
+    <div id="pdf-container"></div>
     <script>
-        // URL до вашого PDF файлу
-        var url = 'Menu.pdf';  // Замініть на правильне ім'я вашого PDF файлу
+        // URL до вашого PDF файлу на GitHub
+        var url = 'CV_QE_Serhii_Protsiv (1).pdf';  // Замініть на правильне ім'я вашого PDF файлу
 
         // Ініціалізація PDF.js
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js';
+
         // Отримуємо PDF документ
         pdfjsLib.getDocument(url).promise.then(function(pdfDoc) {
             var numPages = pdfDoc.numPages;
             var pdfContainer = document.getElementById('pdf-container');
-            
-            // Масштабування на всю ширину екрану
-            var scale = window.innerWidth / 600; // Масштабування під ширину екрана (600px - орієнтовна ширина сторінки PDF)
-            
+
             // Створюємо Canvas для кожної сторінки
             for (var pageNum = 1; pageNum <= numPages; pageNum++) {
                 pdfDoc.getPage(pageNum).then(function(page) {
                     var canvas = document.createElement('canvas');
                     var context = canvas.getContext('2d');
-                    var viewport = page.getViewport({ scale: scale });
+                    var viewport = page.getViewport({ scale: 1.5 });
                     canvas.height = viewport.height;
                     canvas.width = viewport.width;
+
                     // Рендеримо сторінку на канвас
                     var renderContext = {
                         canvasContext: context,
