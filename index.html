@@ -15,7 +15,6 @@
             align-items: center;
             height: 100vh;
             flex-direction: column;
-            overflow: hidden;
         }
         #pdf-container {
             width: 100%;
@@ -48,7 +47,7 @@
 </head>
 <body>
 
-    <h1 style="text-align: center;">PDF Viewer</h1>
+    <h1 style="text-align: center;"></h1>
     <div id="pdf-container"></div>
 
     <script>
@@ -65,42 +64,32 @@
             
             // Масштабування під ширину екрану
             var scale = window.innerWidth / 600; // Масштабування під ширину екрана (600px - орієнтовна ширина сторінки PDF)
-            
-            // Створюємо Canvas для кожної сторінки
-            var promises = []; // Масив для зберігання всіх промісів
 
-            // Перебираємо всі сторінки та додаємо їх в контейнер
-            for (var pageNum = 1; pageNum <= numPages; pageNum++) {
-                promises.push(
-                    pdfDoc.getPage(pageNum).then(function(page) {
-                        return new Promise(function(resolve) {
-                            var canvas = document.createElement('canvas');
-                            var context = canvas.getContext('2d');
-                            var viewport = page.getViewport({ scale: scale });
-                            canvas.height = viewport.height;
-                            canvas.width = viewport.width;
+            // Функція для рендерингу сторінки
+            function renderPage(pageNum) {
+                pdfDoc.getPage(pageNum).then(function(page) {
+                    var canvas = document.createElement('canvas');
+                    var context = canvas.getContext('2d');
+                    var viewport = page.getViewport({ scale: scale });
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
 
-                            // Рендеримо сторінку на канвас
-                            var renderContext = {
-                                canvasContext: context,
-                                viewport: viewport
-                            };
+                    // Рендеримо сторінку на канвас
+                    var renderContext = {
+                        canvasContext: context,
+                        viewport: viewport
+                    };
 
-                            page.render(renderContext).promise.then(function() {
-                                pdfContainer.appendChild(canvas); // Додаємо канвас на сторінку
-                                resolve();
-                            });
-                        });
-                    })
-                );
+                    page.render(renderContext).promise.then(function() {
+                        pdfContainer.appendChild(canvas); // Додаємо канвас на сторінку
+                    });
+                });
             }
 
-            // Дочекатись виконання всіх промісів і додати сторінки в правильному порядку
-            Promise.all(promises).then(function() {
-                console.log('All pages rendered successfully');
-            }).catch(function(error) {
-                console.error('Error rendering PDF pages:', error);
-            });
+            // Перебираємо сторінки по черзі
+            for (var pageNum = 1; pageNum <= numPages; pageNum++) {
+                renderPage(pageNum); // Додаємо кожну сторінку в правильному порядку
+            }
 
         }).catch(function(error) {
             console.error('Error loading PDF:', error);
